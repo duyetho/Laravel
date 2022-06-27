@@ -33,13 +33,14 @@ class PageController extends Controller
     }
 
     
+
     public function getAdminAdd()
     {
         return view('pageadmin.formAdd');
     }
-    public function getIndexAdmin()
-    {
-        return view('pageadmin.admin');
+    public function getIndexAdmin(){
+        $products = product ::all();
+        return view('pageadmin.admin', compact('products')); 
     }
     public function postAdminAdd(Request $request)
     {
@@ -68,5 +69,42 @@ class PageController extends Controller
 
     }
 
+
+    public function Editform(){
+        return view ('pageadmin.formEdit');
+    }
+    
+    public function getAdminEdit($id){
+        $product = product::find($id);
+        return view('pageadmin.formEdit')->with('product',$product);
+    }
+    
+    public function postAdminEdit(Request $request){
+        $id = $request->editId;
+        $product = product::find($id);
+        if($request->hasFile('editImage')){
+            $file = $request -> file ('editImage');
+            $fileName=$file->getClientOriginalName('editImage');
+            $file->move('source/image/product',$fileName);
+        }
+        if ($request->file('editImage')!=null){
+            $product ->image=$fileName;
+        }
+        $product->name=$request->editName;
+        // $product->image=$file_name;
+        $product->description=$request->editDescription;
+        $product->unit_price=$request->editPrice;
+        $product->promotion_price=$request->editPromotionPrice;
+        $product->unit=$request->editUnit;
+        $product->new=$request->editNew;
+        $product->id_type=$request->editType;
+        $product->save();
+        return redirect('/showadmin');
+    }
+    public function postAdminDelete($id){
+        $product =product::find($id);
+        $product->delete();
+        return redirect('/showadmin');
+}
 }
 
